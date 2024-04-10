@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -19,9 +18,6 @@ namespace OpenAi
          private int previousActiveTab = -1;
          private static int spacing = 20;
          private static Scene activeScene;
-         private static float saveFrequency = 1;
-         private static HashSet<Type> toSave = new HashSet<Type>();
-         private static Coroutine saveCoroutine = null;
 
          private OpenAiCredentialsWindow credsWindow;
 
@@ -30,19 +26,17 @@ namespace OpenAi
              raw = 0,
              text = 1,
              image = 2,
-             script = 3,
-             creds = 4,
-             help = 5,
+             creds = 3,
+             help = 4,
          }
          
          private static Dictionary<Tabs, string> tabNames = new Dictionary<Tabs, string>()
          {
-             { Tabs.raw, "☷ Raw Requests" },
-             { Tabs.text, "❡ Text Completion" },
-             { Tabs.image, "✎ Image Generation" },
-             { Tabs.script, "{} Script (Beta)" },
-             { Tabs.creds, "✱ Credentials" },
-             { Tabs.help, "❤ Readme" }
+             { Tabs.raw, "Raw Requests" },
+             { Tabs.text, "Text Completion" },
+             { Tabs.image, "Image Generation" },
+             { Tabs.creds, "Credentials" },
+             { Tabs.help, "Readme" }
          };
          
          private static Dictionary<Tabs, string> shortTabNames = new Dictionary<Tabs, string>()
@@ -50,7 +44,6 @@ namespace OpenAi
              { Tabs.raw, "Raw" },
              { Tabs.text, "Text" },
              { Tabs.image, "Image" },
-             { Tabs.script, "Script" },
              { Tabs.creds, "Creds" },
              { Tabs.help, "Help" }
          };
@@ -59,36 +52,20 @@ namespace OpenAi
          private static Dictionary<Type, Object> Editors = new Dictionary<Type, Object>();
          private static Dictionary<Type, GameObject> Prefabs = new Dictionary<Type, GameObject>();
 
-         private void RenderInspector<T,P>()
+         private void RenderInspector<T,P>() 
              where T : EditorWidowOrInspector<T>
              where P : MonoBehaviour
          {
              var editor = GetTargetEditor<T>();
              editor.InternalTarget = GetTarget<P>();
 
-             AiEditorUtils.ChangeCheck(() =>
+             EditorUtils.ChangeCheck(() =>
              {
                  editor.OnInspectorGUI();
              }, () =>
              {
-                 if (toSave.Add(typeof(P)) && saveCoroutine == null)
-                 {
-                     saveCoroutine = OpenAiApi.Runner.StartCoroutine(Save(saveFrequency));
-                 }
+                 SavePrefab<P>();
              });
-         }
-
-         static IEnumerator Save(float delay)
-         {
-             yield return new WaitForSeconds(delay);
-             
-             foreach (Type type in toSave)
-             {
-                 PrefabUtility.SavePrefabAsset(Prefabs[type]);
-             }
-
-             toSave.Clear();
-             saveCoroutine = null;
          }
          
          private static T GetTargetEditor<T>() where T : Editor
@@ -203,20 +180,20 @@ namespace OpenAi
          {
              DrawUi();
          }
-         
+
          void DrawUi()
          {
-             scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.Width(AiEditorUtils.ScaledWidth));
+             scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.Width(Screen.width));
              EditorGUILayout.BeginHorizontal();
              GUILayout.Space(spacing);
              EditorGUILayout.BeginVertical();
              GUILayout.Space(spacing);
 
-             string[] names = (AiEditorUtils.ScaledWidth < 550 ? shortTabNames.Values : tabNames.Values).ToArray();
+             string[] names = (Screen.width < 550 ? shortTabNames.Values : tabNames.Values).ToArray();
 
              ActiveTab = ActiveTab != -1 ? ActiveTab : previousActiveTab;
              previousActiveTab = ActiveTab;
-             ActiveTab = GUILayout.Toolbar(ActiveTab, names, GUILayout.Width(AiEditorUtils.ScaledWidth - spacing * 2 - 5));
+             ActiveTab = GUILayout.Toolbar(ActiveTab, names, GUILayout.Width(Screen.width - spacing * 2 - 5));
              bool tabChanged = previousActiveTab != ActiveTab;
 
              GUILayout.Space(spacing);
@@ -228,17 +205,12 @@ namespace OpenAi
 
              if (ActiveTab == (int)Tabs.text)
              {
-                 RenderInspector<OpenAiTextReplaceEditor, OpenAiReplaceText>();
+                 RenderInspector<OpenAiTextReplaceEditor, OpenAiTextReplace>();
              }
 
              if (ActiveTab == (int)Tabs.image)
              {
-                 RenderInspector<OpenAiReplaceImageEditor, OpenAiReplaceImage>();
-             }
-
-             if (ActiveTab == (int)Tabs.script)
-             {
-                 RenderInspector<OpenAiComponentEditor, OpenAiComponent>();
+                 RenderInspector<OpenAiImageReplaceEditor, OpenAiImageReplace>();
              }
 
              if (ActiveTab == (int)Tabs.creds)

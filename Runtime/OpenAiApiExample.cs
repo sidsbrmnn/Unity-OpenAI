@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using MyBox;
-using OpenAI.AiModels;
+﻿using MyBox;
 using UnityEngine;
 
 namespace OpenAi
@@ -9,63 +7,30 @@ namespace OpenAi
     {
         public Configuration configuration;
 
-        [Separator("AI Text")] 
-        public AiTextRequest aiTextRequest;
-        public AiText aiText;
+        [Separator("Text Completion")] 
+        public AiText.Request completionRequest;
+        public AiText aiTextResponse;
 
-        [Separator("AI Chat")] 
-        public AiChatRequest aiChatRequest;
-        public AiChat aiChat;
-
-        [Separator("AI Image")] 
-        public AiImageRequest aiImageRequest;
+        [Separator("Image Generation")] 
+        public AiImage.Request imageRequest;
+        
         public AiImage aiImageResponse;
 
-        [Separator("AI Image Edit")] 
-        public AiImageEditRequest aiImageEditRequest;
-        public AiImage aiImageEditResponse;
-
-        [Separator("AI Image Variation")] 
-        public AiImageVariationRequest aiImageVariationRequest;
-        public AiImage aiImageVariationResponse;
-
-        private Configuration ConfigOrNull => (configuration.ApiKey != "" || configuration.Organization != "") ? configuration : null;
-
-        public async Task SendAiTextRequest()
+        public async void SendCompletionRequest()
         {
-            OpenAiApi openai = new OpenAiApi(ConfigOrNull);
-            aiText = await openai.Send(aiTextRequest, callback: streamResult =>
-            {
-                aiText = streamResult;
-            });
-            Debug.Log("complete");
+            OpenAiApi openai = new OpenAiApi();
+            aiTextResponse = await openai.CreateCompletion(completionRequest);
         }
 
-        public async Task SendAiChatRequest()
+        public async void SendImageRequest()
         {
-            OpenAiApi openai = new OpenAiApi(ConfigOrNull);
-            aiChat = await openai.Send(aiChatRequest, callback: streamResult =>
-            {
-                aiChat = streamResult;
-            });
+            OpenAiApi openai = new OpenAiApi();
+            aiImageResponse = await openai.CreateImage(imageRequest);
         }
 
-        public async Task SendAiImageRequest()
+        public void ReloadAuth()
         {
-            OpenAiApi openai = new OpenAiApi(ConfigOrNull);
-            aiImageResponse = await openai.Send(aiImageRequest);
-        }
-
-        public async Task SendAiImageEditRequest()
-        {
-            OpenAiApi openai = new OpenAiApi(ConfigOrNull);
-            aiImageEditResponse = await openai.Send(aiImageEditRequest);
-        }
-        
-        public async Task SendAiImageVariationRequest()
-        {
-            OpenAiApi openai = new OpenAiApi(ConfigOrNull);
-            aiImageVariationResponse = await openai.Send(aiImageVariationRequest);
+            Configuration.GlobalConfig = OpenAiApi.ReadConfigFromUserDirectory();
         }
     }
 }

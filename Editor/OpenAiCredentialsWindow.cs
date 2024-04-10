@@ -135,20 +135,20 @@ namespace OpenAi
 
          public Rect DrawUi()
          {
-             return AiEditorUtils.Horizontal(() =>
+             return EditorUtils.Horizontal(() =>
              {
-                 AiEditorUtils.SmallSpace();
-                 AiEditorUtils.Vertical(() =>
+                 EditorUtils.SmallSpace();
+                 EditorUtils.Vertical(() =>
                  {
-                     AiEditorUtils.SmallSpace();
+                     EditorUtils.SmallSpace();
                      if (helpText != "")
                      {
                          EditorGUILayout.HelpBox(helpText, messageType);
                      }
 
-                     AiEditorUtils.SmallSpace();
+                     EditorUtils.SmallSpace();
 
-                     AiEditorUtils.Horizontal(() =>
+                     EditorUtils.Horizontal(() =>
                      {
                          string priorValue = apiKey;
                          if (showApiKey)
@@ -165,18 +165,18 @@ namespace OpenAi
                              canSave = true;
                          }
 
-                         if (GUILayout.Button("*", AiEditorUtils.smallButton))
+                         if (GUILayout.Button("*", EditorUtils.smallButton))
                          {
                              showApiKey = !showApiKey;
                          }
 
-                         if (GUILayout.Button("?", AiEditorUtils.smallButton))
+                         if (GUILayout.Button("?", EditorUtils.smallButton))
                          {
                              Application.OpenURL("https://platform.openai.com/account/api-keys");
                          }
                      });
 
-                     AiEditorUtils.Horizontal(() =>
+                     EditorUtils.Horizontal(() =>
                      {
                          string priorValue = apiKey;
                          priorValue = orgId;
@@ -186,30 +186,30 @@ namespace OpenAi
                              canSave = true;
                          }
 
-                         if (GUILayout.Button("?", AiEditorUtils.smallButton))
+                         if (GUILayout.Button("?", EditorUtils.smallButton))
                          {
                              Application.OpenURL("https://platform.openai.com/account/org-settings");
                          }
                      });
-                     AiEditorUtils.BigSpace();
-                     AiEditorUtils.Horizontal(() =>
+                     EditorUtils.BigSpace();
+                     EditorUtils.Horizontal(() =>
                      {
-                         AiEditorUtils.BigSpace();
+                         EditorUtils.BigSpace();
                          if (GUILayout.Button("Cancel"))
                          {
                              Cancel();
                          }
 
-                         AiEditorUtils.BigSpace();
-                         AiEditorUtils.Disable(!Directory.Exists(OpenAiApi.ConfigFileDir), () =>
+                         EditorUtils.BigSpace();
+                         EditorUtils.Disable(!Directory.Exists(OpenAiApi.ConfigFileDir), () =>
                          {
                              if (GUILayout.Button("Open"))
                              {
-                                 AiEditorUtils.OpenFolder(OpenAiApi.ConfigFileDir);
+                                 EditorUtils.OpenFolder(OpenAiApi.ConfigFileDir);
                              }
                          });
-                         AiEditorUtils.BigSpace();
-                         AiEditorUtils.Disable(!canSave, () =>
+                         EditorUtils.BigSpace();
+                         EditorUtils.Disable(!canSave, () =>
                          {
                              if (GUILayout.Button("Save"))
                              {
@@ -219,11 +219,11 @@ namespace OpenAi
                                  CloseWindow();
                              }
                          });
-                         AiEditorUtils.BigSpace();
+                         EditorUtils.BigSpace();
                      });
-                     AiEditorUtils.SmallSpace();
+                     EditorUtils.SmallSpace();
                  });
-                 AiEditorUtils.SmallSpace();
+                 EditorUtils.SmallSpace();
              });
          }
      }
